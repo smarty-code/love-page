@@ -29,9 +29,8 @@ const NoButton = ({ stage, position, onAttempt, containerBounds, yesButtonBounds
   const { width, height, fontSize, label } = buttonConfig;
 
   const getRandomPosition = useCallback(() => {
-    const buffer = 60;
-    // Add generous padding around the Yes button (invisible boundary)
-    const yesPadding = 40;
+    const edgeBuffer = 20; // Buffer from card edges
+    const yesPadding = 50; // Extra padding around yes button
     
     // Define the exclusion zone (Yes button area + padding)
     const exclusionZone = {
@@ -41,46 +40,89 @@ const NoButton = ({ stage, position, onAttempt, containerBounds, yesButtonBounds
       bottom: yesButtonBounds.y + yesButtonBounds.height + yesPadding,
     };
     
+    // The No button should stay in the upper 70% of the card, never below Yes button
+    const maxY = Math.min(yesButtonBounds.y - yesPadding - height, containerBounds.height * 0.65);
+    
     // Helper function to check if No button overlaps with exclusion zone
     const overlapsExclusionZone = (x: number, y: number) => {
       const noRight = x + width;
       const noBottom = y + height;
       
-      // Check if there's any overlap
       return !(x > exclusionZone.right || 
                noRight < exclusionZone.left || 
                y > exclusionZone.bottom || 
                noBottom < exclusionZone.top);
     };
     
+    // Helper function to check if position is within card bounds
+    const isWithinBounds = (x: number, y: number) => {
+      return x >= edgeBuffer && 
+             x + width <= containerBounds.width - edgeBuffer &&
+             y >= edgeBuffer && 
+             y + height <= maxY;
+    };
+    
+    // Define three zones: left of Yes, right of Yes, above Yes
+    const zones = [
+      // Left zone
+      { 
+        minX: edgeBuffer, 
+        maxX: Math.max(edgeBuffer, exclusionZone.left - width), 
+        minY: edgeBuffer, 
+        maxY: maxY 
+      },
+      // Right zone
+      { 
+        minX: Math.min(containerBounds.width - width - edgeBuffer, exclusionZone.right), 
+        maxX: containerBounds.width - width - edgeBuffer, 
+        minY: edgeBuffer, 
+        maxY: maxY 
+      },
+      // Above zone
+      { 
+        minX: edgeBuffer, 
+        maxX: containerBounds.width - width - edgeBuffer, 
+        minY: edgeBuffer, 
+        maxY: Math.max(edgeBuffer, exclusionZone.top - height) 
+      },
+    ];
+    
+    // Filter out invalid zones
+    const validZones = zones.filter(z => z.maxX > z.minX && z.maxY > z.minY);
+    
     let attempts = 0;
-    let newX: number, newY: number;
+    let newX: number = edgeBuffer;
+    let newY: number = edgeBuffer;
     let validPosition = false;
     
     while (!validPosition && attempts < 100) {
-      newX = Math.random() * (containerBounds.width - width - buffer * 2) + buffer;
-      newY = Math.random() * (containerBounds.height - height - buffer * 2) + buffer;
+      const zone = validZones[Math.floor(Math.random() * validZones.length)];
       
-      // Check if position is outside the exclusion zone
-      if (!overlapsExclusionZone(newX, newY)) {
-        validPosition = true;
+      if (zone) {
+        newX = Math.random() * (zone.maxX - zone.minX) + zone.minX;
+        newY = Math.random() * (zone.maxY - zone.minY) + zone.minY;
+        
+        if (!overlapsExclusionZone(newX, newY) && isWithinBounds(newX, newY)) {
+          validPosition = true;
+        }
       }
       
       attempts++;
     }
     
-    // If no valid position found after max attempts, place it far from Yes button
+    // Fallback position
     if (!validPosition) {
       const yesCenterX = yesButtonBounds.x + yesButtonBounds.width / 2;
-      if (yesCenterX < containerBounds.width / 2) {
-        newX = containerBounds.width - width - buffer;
+      newY = Math.max(edgeBuffer, Math.min(yesButtonBounds.y - yesPadding - height, maxY - height));
+      
+      if (yesCenterX > containerBounds.width / 2) {
+        newX = edgeBuffer;
       } else {
-        newX = buffer;
+        newX = containerBounds.width - width - edgeBuffer;
       }
-      newY = buffer + Math.random() * (containerBounds.height / 3);
     }
     
-    return { x: newX!, y: newY! };
+    return { x: newX, y: newY };
   }, [containerBounds, yesButtonBounds, width, height]);
 
   const handleHover = () => {
@@ -100,7 +142,7 @@ const NoButton = ({ stage, position, onAttempt, containerBounds, yesButtonBounds
 
   return (
     <motion.button
-      className="absolute bg-muted text-muted-foreground font-quicksand font-medium rounded-full border-2 border-border cursor-pointer select-none"
+      className="absolute z-50 bg-muted text-muted-foreground font-quicksand font-medium rounded-full border-2 border-border cursor-pointer select-none shadow-lg"
       style={{ fontSize }}
       initial={{ x: position.x, y: position.y, width, height }}
       animate={{ 

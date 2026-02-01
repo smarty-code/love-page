@@ -58,9 +58,8 @@ const ProposalModal = ({ name, imageUrl }: ProposalModalProps) => {
     const bounds = getContainerBounds();
     const yesBounds = getYesButtonBounds();
     
-    const buffer = 50;
-    // Add generous padding around the Yes button (invisible boundary)
-    const yesPadding = 40; // Extra padding around yes button
+    const edgeBuffer = 20; // Buffer from card edges
+    const yesPadding = 50; // Extra padding around yes button
     const buttonWidth = stage <= 4 ? 120 : stage <= 8 ? 100 : stage <= 12 ? 80 : 70;
     const buttonHeight = stage <= 4 ? 48 : stage <= 8 ? 42 : stage <= 12 ? 34 : 30;
     
@@ -72,49 +71,93 @@ const ProposalModal = ({ name, imageUrl }: ProposalModalProps) => {
       bottom: yesBounds.y + yesBounds.height + yesPadding,
     };
     
+    // Define valid movement areas (left, right, or above the Yes button - never below)
+    // The No button should stay in the upper 70% of the card
+    const maxY = Math.min(yesBounds.y - yesPadding - buttonHeight, bounds.height * 0.65);
+    
     // Helper function to check if No button overlaps with exclusion zone
     const overlapsExclusionZone = (x: number, y: number) => {
       const noRight = x + buttonWidth;
       const noBottom = y + buttonHeight;
       
-      // Check if there's any overlap
       return !(x > exclusionZone.right || 
                noRight < exclusionZone.left || 
                y > exclusionZone.bottom || 
                noBottom < exclusionZone.top);
     };
     
+    // Helper function to check if position is within card bounds
+    const isWithinBounds = (x: number, y: number) => {
+      return x >= edgeBuffer && 
+             x + buttonWidth <= bounds.width - edgeBuffer &&
+             y >= edgeBuffer && 
+             y + buttonHeight <= maxY;
+    };
+    
     let attempts = 0;
-    let newX: number, newY: number;
+    let newX: number = edgeBuffer;
+    let newY: number = edgeBuffer;
     let validPosition = false;
     
+    // Define three zones: left of Yes, right of Yes, above Yes
+    const zones = [
+      // Left zone
+      { 
+        minX: edgeBuffer, 
+        maxX: Math.max(edgeBuffer, exclusionZone.left - buttonWidth), 
+        minY: edgeBuffer, 
+        maxY: maxY 
+      },
+      // Right zone
+      { 
+        minX: Math.min(bounds.width - buttonWidth - edgeBuffer, exclusionZone.right), 
+        maxX: bounds.width - buttonWidth - edgeBuffer, 
+        minY: edgeBuffer, 
+        maxY: maxY 
+      },
+      // Above zone (centered above Yes button)
+      { 
+        minX: edgeBuffer, 
+        maxX: bounds.width - buttonWidth - edgeBuffer, 
+        minY: edgeBuffer, 
+        maxY: Math.max(edgeBuffer, exclusionZone.top - buttonHeight) 
+      },
+    ];
+    
+    // Filter out invalid zones (where max < min)
+    const validZones = zones.filter(z => z.maxX > z.minX && z.maxY > z.minY);
+    
     while (!validPosition && attempts < 100) {
-      newX = Math.random() * (bounds.width - buttonWidth - buffer * 2) + buffer;
-      newY = Math.random() * (bounds.height - buttonHeight - buffer * 2) + buffer;
+      // Pick a random valid zone
+      const zone = validZones[Math.floor(Math.random() * validZones.length)];
       
-      // Check if position is outside the exclusion zone
-      if (!overlapsExclusionZone(newX, newY)) {
-        validPosition = true;
+      if (zone) {
+        newX = Math.random() * (zone.maxX - zone.minX) + zone.minX;
+        newY = Math.random() * (zone.maxY - zone.minY) + zone.minY;
+        
+        if (!overlapsExclusionZone(newX, newY) && isWithinBounds(newX, newY)) {
+          validPosition = true;
+        }
       }
       
       attempts++;
     }
     
-    // If no valid position found after max attempts, place it far from Yes button
+    // Fallback: place to the left or right of Yes button at same height
     if (!validPosition) {
-      // Place on the opposite side of the container from the Yes button
       const yesCenterX = yesBounds.x + yesBounds.width / 2;
-      if (yesCenterX < bounds.width / 2) {
-        // Yes button is on the left, place No button on the right
-        newX = bounds.width - buttonWidth - buffer;
+      newY = Math.max(edgeBuffer, Math.min(yesBounds.y, maxY - buttonHeight));
+      
+      if (yesCenterX > bounds.width / 2) {
+        // Yes is on right, place No on left
+        newX = edgeBuffer;
       } else {
-        // Yes button is on the right, place No button on the left
-        newX = buffer;
+        // Yes is on left, place No on right
+        newX = bounds.width - buttonWidth - edgeBuffer;
       }
-      newY = buffer + Math.random() * (bounds.height / 3);
     }
     
-    setNoButtonPosition({ x: newX!, y: newY! });
+    setNoButtonPosition({ x: newX, y: newY });
   }, [getContainerBounds, getYesButtonBounds, stage]);
 
   const handleNoAttempt = useCallback(() => {
@@ -166,7 +209,7 @@ const ProposalModal = ({ name, imageUrl }: ProposalModalProps) => {
       {/* Modal */}
       <motion.div
         ref={containerRef}
-        className="relative w-full max-w-lg md:max-w-xl lg:max-w-2xl min-h-[450px] md:min-h-[500px] bg-card rounded-3xl shadow-card p-8 md:p-12 overflow-hidden"
+        className="relative w-full max-w-lg md:max-w-xl lg:max-w-2xl min-h-[450px] md:min-h-[500px] bg-card rounded-3xl shadow-card p-8 md:p-12"
         initial={{ scale: 0.8, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         transition={{

@@ -24,25 +24,34 @@ const Navbar = ({ isValentinePage = false }: NavbarProps) => {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-primary/10 shadow-sm">
+      <nav 
+        className="fixed top-0 left-0 right-0 z-[60]"
+        style={{
+          background: "rgba(255, 255, 255, 0.25)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          borderBottom: "1px solid rgba(255, 255, 255, 0.3)",
+          boxShadow: "0 4px 30px rgba(236, 72, 153, 0.1)",
+        }}
+      >
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-14 md:h-16">
             {/* Logo / Brand */}
             <motion.button
               onClick={() => navigate("/create")}
-              className="flex items-center gap-2 text-primary font-romantic text-xl md:text-2xl"
+              className="flex items-center gap-2 text-primary font-romantic text-xl md:text-2xl drop-shadow-sm"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              <Heart className="w-5 h-5 md:w-6 md:h-6 fill-primary" />
-              <span>Love Page</span>
+              <Heart className="w-5 h-5 md:w-6 md:h-6 fill-primary drop-shadow-sm" />
+              <span className="drop-shadow-sm">Love Page</span>
             </motion.button>
 
             {/* Right side - Menu or nothing based on page type */}
             {!isValentinePage && (
               <motion.button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="p-2 rounded-lg hover:bg-primary/10 transition-colors text-primary"
+                className="p-2 rounded-xl hover:bg-white/30 transition-colors text-primary backdrop-blur-sm"
                 whileTap={{ scale: 0.9 }}
                 aria-label="Toggle menu"
               >
@@ -86,7 +95,14 @@ const Navbar = ({ isValentinePage = false }: NavbarProps) => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="fixed top-14 md:top-16 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-primary/10 shadow-lg"
+              className="fixed top-14 md:top-16 left-0 right-0 z-50"
+              style={{
+                background: "rgba(255, 255, 255, 0.4)",
+                backdropFilter: "blur(24px)",
+                WebkitBackdropFilter: "blur(24px)",
+                borderBottom: "1px solid rgba(255, 255, 255, 0.4)",
+                boxShadow: "0 8px 32px rgba(236, 72, 153, 0.15)",
+              }}
             >
               <div className="container mx-auto px-4 py-3">
                 <div className="flex flex-col gap-1">
@@ -98,10 +114,10 @@ const Navbar = ({ isValentinePage = false }: NavbarProps) => {
                       <motion.button
                         key={item.label}
                         onClick={() => handleNavigation(item.path)}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left ${
+                        className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left ${
                           isActive
-                            ? "bg-primary/10 text-primary"
-                            : "hover:bg-primary/5 text-gray-700"
+                            ? "bg-white/50 text-primary shadow-sm"
+                            : "hover:bg-white/30 text-gray-700"
                         }`}
                         whileHover={{ x: 4 }}
                         whileTap={{ scale: 0.98 }}
