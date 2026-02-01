@@ -1,15 +1,17 @@
 # Love Page 💕
 
-A beautiful, interactive proposal page built with React and TypeScript.
+A beautiful, interactive Valentine's page creator built with React and TypeScript. Create personalized Valentine pages for your loved ones and share them via unique URLs!
 
 ## Features
 
 - 💖 Animated floating hearts background
 - 🎨 Beautiful romantic gradient design
-- 🖼️ Custom image support via URL parameters
-- 📝 Customizable name via URL parameters
+- 📸 Photo upload with Cloudinary integration
+- 📝 Customizable name for your loved one
+- 🔗 Shareable unique URLs
 - 🎭 Interactive proposal modal with playful animations
 - 📱 Fully responsive design
+- ✨ Live preview while creating
 
 ## Tech Stack
 
@@ -18,6 +20,7 @@ A beautiful, interactive proposal page built with React and TypeScript.
 - **Styling**: Tailwind CSS
 - **UI Components**: shadcn/ui
 - **Animations**: Framer Motion
+- **Image Storage**: Cloudinary
 - **Testing**: Vitest
 
 ## Getting Started
@@ -26,6 +29,19 @@ A beautiful, interactive proposal page built with React and TypeScript.
 
 - Node.js 18+ or Bun
 - npm, yarn, or bun
+- Cloudinary account (free tier available)
+
+### Cloudinary Setup
+
+1. Create a free account at [Cloudinary](https://cloudinary.com)
+2. Go to your [Cloudinary Dashboard](https://cloudinary.com/console)
+3. Note your **Cloud Name** from the dashboard
+4. Create an unsigned upload preset:
+   - Go to **Settings** → **Upload** → **Upload presets**
+   - Click **Add upload preset**
+   - Set **Signing Mode** to **Unsigned**
+   - (Optional) Set a folder name like `valentine-pages`
+   - Save and note the **preset name**
 
 ### Installation
 
@@ -41,23 +57,38 @@ bun install
 # or
 npm install
 
-# Start the development server
+# Copy environment file and configure
+cp .env.example .env
+```
+
+Edit `.env` with your Cloudinary credentials:
+```env
+VITE_CLOUDINARY_CLOUD_NAME=your_cloud_name
+VITE_CLOUDINARY_UPLOAD_PRESET=your_upload_preset
+```
+
+Start the development server:
+```bash
 bun run dev
 # or
 npm run dev
 ```
 
-### Usage
+### How It Works
 
-Open your browser and navigate to:
+1. **Visit the app** - Go to `/create` to start
+2. **Enter details** - Add your loved one's name and upload their photo
+3. **Generate URL** - Click "Create Valentine Page" to upload and generate a unique URL
+4. **Share** - Copy and share the URL with your loved one!
+5. **View** - Recipients see a beautiful personalized Valentine page
+6. **Create more** - A floating button lets anyone create their own page
 
+### URL Structure
+
+Generated URLs look like:
 ```
-http://localhost:8080/?name=YourName&image=https://example.com/image.jpg
+https://yoursite.com/?name=YourLove&image=https://res.cloudinary.com/...
 ```
-
-**URL Parameters:**
-- `name` - The name to display (default: "My Love")
-- `image` - URL to a profile image (optional)
 
 ## Building for Production
 
