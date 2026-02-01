@@ -364,8 +364,9 @@ const Create = () => {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
+            className="w-full h-full"
           >
-            <Card className="border-primary/20 shadow-lg bg-white/80 backdrop-blur h-full">
+            <Card className="border-primary/20 shadow-lg bg-white/80 backdrop-blur h-full w-full">
               <CardHeader>
                 <CardTitle className="text-primary flex items-center gap-2">
                   <Sparkles className="w-5 h-5" />
@@ -375,8 +376,8 @@ const Create = () => {
                   This is how your Valentine page will look
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="aspect-[9/16] max-h-[400px] rounded-lg overflow-hidden border border-primary/20 bg-gradient-to-b from-pink-100 to-pink-200 relative">
+              <CardContent className="flex items-center justify-center w-full">
+                <div className="aspect-[9/16] w-full max-w-[300px] rounded-lg overflow-hidden border border-primary/20 bg-gradient-to-b from-pink-100 to-pink-200 relative mx-auto">
                   {/* Mini preview of the Valentine page */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
                     {/* Floating hearts decoration */}
