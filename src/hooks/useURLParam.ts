@@ -35,14 +35,31 @@ export const useImageURL = (paramName: string = "image") => {
 
     if (!param) return null;
 
-    // Basic URL validation
+    // Try to decode the URL if it's encoded
+    let decodedUrl = param;
     try {
-      const url = new URL(decodeURIComponent(param));
-      // Only allow http and https protocols
-      if (url.protocol === "http:" || url.protocol === "https:") {
-        return url.toString();
+      // Check if the URL is encoded (contains %xx patterns)
+      if (param.includes('%')) {
+        decodedUrl = decodeURIComponent(param);
       }
     } catch {
+      // If decoding fails, use the original param
+      decodedUrl = param;
+    }
+
+    // Basic URL validation
+    try {
+      const url = new URL(decodedUrl);
+      // Only allow http and https protocols
+      if (url.protocol === "http:" || url.protocol === "https:") {
+        // Return the href directly without re-encoding
+        return url.href;
+      }
+    } catch {
+      // If it's not a valid absolute URL, check if it starts with http/https
+      if (decodedUrl.startsWith('http://') || decodedUrl.startsWith('https://')) {
+        return decodedUrl;
+      }
       return null;
     }
 

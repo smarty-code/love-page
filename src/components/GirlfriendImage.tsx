@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface GirlfriendImageProps {
   imageUrl: string | null;
@@ -9,6 +9,12 @@ interface GirlfriendImageProps {
 const GirlfriendImage = ({ imageUrl, name }: GirlfriendImageProps) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+
+  // Reset states when imageUrl changes
+  useEffect(() => {
+    setImageLoaded(false);
+    setImageError(false);
+  }, [imageUrl]);
 
   if (!imageUrl || imageError) {
     return null;
@@ -50,6 +56,7 @@ const GirlfriendImage = ({ imageUrl, name }: GirlfriendImageProps) => {
             className={`w-full h-full object-cover transition-opacity duration-300 ${
               imageLoaded ? "opacity-100" : "opacity-0"
             }`}
+            referrerPolicy="no-referrer"
             onLoad={() => setImageLoaded(true)}
             onError={() => setImageError(true)}
           />
