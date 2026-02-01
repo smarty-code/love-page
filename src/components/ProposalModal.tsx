@@ -59,31 +59,62 @@ const ProposalModal = ({ name, imageUrl }: ProposalModalProps) => {
     const yesBounds = getYesButtonBounds();
     
     const buffer = 50;
-    const minDistance = 160;
+    // Add generous padding around the Yes button (invisible boundary)
+    const yesPadding = 40; // Extra padding around yes button
     const buttonWidth = stage <= 4 ? 120 : stage <= 8 ? 100 : stage <= 12 ? 80 : 70;
     const buttonHeight = stage <= 4 ? 48 : stage <= 8 ? 42 : stage <= 12 ? 34 : 30;
     
+    // Define the exclusion zone (Yes button area + padding)
+    const exclusionZone = {
+      left: yesBounds.x - yesPadding,
+      right: yesBounds.x + yesBounds.width + yesPadding,
+      top: yesBounds.y - yesPadding,
+      bottom: yesBounds.y + yesBounds.height + yesPadding,
+    };
+    
+    // Helper function to check if No button overlaps with exclusion zone
+    const overlapsExclusionZone = (x: number, y: number) => {
+      const noRight = x + buttonWidth;
+      const noBottom = y + buttonHeight;
+      
+      // Check if there's any overlap
+      return !(x > exclusionZone.right || 
+               noRight < exclusionZone.left || 
+               y > exclusionZone.bottom || 
+               noBottom < exclusionZone.top);
+    };
+    
     let attempts = 0;
     let newX: number, newY: number;
+    let validPosition = false;
     
-    do {
+    while (!validPosition && attempts < 100) {
       newX = Math.random() * (bounds.width - buttonWidth - buffer * 2) + buffer;
       newY = Math.random() * (bounds.height - buttonHeight - buffer * 2) + buffer;
       
-      const yesCenterX = yesBounds.x + yesBounds.width / 2;
-      const yesCenterY = yesBounds.y + yesBounds.height / 2;
-      const noCenterX = newX + buttonWidth / 2;
-      const noCenterY = newY + buttonHeight / 2;
-      
-      const distance = Math.sqrt(
-        Math.pow(yesCenterX - noCenterX, 2) + Math.pow(yesCenterY - noCenterY, 2)
-      );
+      // Check if position is outside the exclusion zone
+      if (!overlapsExclusionZone(newX, newY)) {
+        validPosition = true;
+      }
       
       attempts++;
-      if (distance > minDistance || attempts > 30) break;
-    } while (attempts < 30);
+    }
     
-    setNoButtonPosition({ x: newX, y: newY });
+    // If no valid position found after max attempts, place it far from Yes button
+    if (!validPosition) {
+      // Place on the opposite side of the container from the Yes button
+      const yesCenterX = yesBounds.x + yesBounds.width / 2;
+      if (yesCenterX < bounds.width / 2) {
+        // Yes button is on the left, place No button on the right
+        newX = bounds.width - buttonWidth - buffer;
+      } else {
+        // Yes button is on the right, place No button on the left
+        newX = buffer;
+      }
+      newY = buffer + Math.random() * (bounds.height / 3);
+    }
+    
+    setNoButtonPosition({ x: newX!, y: newY! });
   }, [getContainerBounds, getYesButtonBounds, stage]);
 
   const handleNoAttempt = useCallback(() => {

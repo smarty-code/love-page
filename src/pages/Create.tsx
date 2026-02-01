@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import FloatingHearts from "@/components/FloatingHearts";
+import Navbar from "@/components/Navbar";
+import SocialShareIcons from "@/components/SocialShareIcons";
 import { Heart, Upload, Copy, Check, Image as ImageIcon, Sparkles } from "lucide-react";
 
 const Create = () => {
@@ -83,9 +85,29 @@ const Create = () => {
 
   const copyToClipboard = async () => {
     if (generatedUrl) {
-      await navigator.clipboard.writeText(generatedUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      try {
+        // Try modern clipboard API first
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(generatedUrl);
+        } else {
+          // Fallback for older browsers or non-secure contexts
+          const textArea = document.createElement("textarea");
+          textArea.value = generatedUrl;
+          textArea.style.position = "fixed";
+          textArea.style.left = "-999999px";
+          textArea.style.top = "-999999px";
+          document.body.appendChild(textArea);
+          textArea.focus();
+          textArea.select();
+          document.execCommand("copy");
+          document.body.removeChild(textArea);
+        }
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch (err) {
+        console.error("Failed to copy:", err);
+        alert("Failed to copy. Please copy the link manually.");
+      }
     }
   };
 
@@ -102,6 +124,9 @@ const Create = () => {
 
   return (
     <div className="min-h-screen gradient-romantic overflow-hidden relative">
+      {/* Navbar - Main page mode (with menu) */}
+      <Navbar />
+
       {/* Background effects */}
       <div
         className="absolute inset-0 opacity-50"
@@ -284,6 +309,11 @@ const Create = () => {
                         >
                           Create Another
                         </Button>
+                      </div>
+
+                      {/* Social Share Icons */}
+                      <div className="pt-2 border-t border-green-200">
+                        <SocialShareIcons url={generatedUrl} name={name} />
                       </div>
                     </motion.div>
                   )}

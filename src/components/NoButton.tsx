@@ -30,30 +30,57 @@ const NoButton = ({ stage, position, onAttempt, containerBounds, yesButtonBounds
 
   const getRandomPosition = useCallback(() => {
     const buffer = 60;
-    const minDistance = 180;
+    // Add generous padding around the Yes button (invisible boundary)
+    const yesPadding = 40;
+    
+    // Define the exclusion zone (Yes button area + padding)
+    const exclusionZone = {
+      left: yesButtonBounds.x - yesPadding,
+      right: yesButtonBounds.x + yesButtonBounds.width + yesPadding,
+      top: yesButtonBounds.y - yesPadding,
+      bottom: yesButtonBounds.y + yesButtonBounds.height + yesPadding,
+    };
+    
+    // Helper function to check if No button overlaps with exclusion zone
+    const overlapsExclusionZone = (x: number, y: number) => {
+      const noRight = x + width;
+      const noBottom = y + height;
+      
+      // Check if there's any overlap
+      return !(x > exclusionZone.right || 
+               noRight < exclusionZone.left || 
+               y > exclusionZone.bottom || 
+               noBottom < exclusionZone.top);
+    };
     
     let attempts = 0;
     let newX: number, newY: number;
+    let validPosition = false;
     
-    do {
+    while (!validPosition && attempts < 100) {
       newX = Math.random() * (containerBounds.width - width - buffer * 2) + buffer;
       newY = Math.random() * (containerBounds.height - height - buffer * 2) + buffer;
       
-      // Calculate distance from Yes button center
-      const yesCenterX = yesButtonBounds.x + yesButtonBounds.width / 2;
-      const yesCenterY = yesButtonBounds.y + yesButtonBounds.height / 2;
-      const noCenterX = newX + width / 2;
-      const noCenterY = newY + height / 2;
-      
-      const distance = Math.sqrt(
-        Math.pow(yesCenterX - noCenterX, 2) + Math.pow(yesCenterY - noCenterY, 2)
-      );
+      // Check if position is outside the exclusion zone
+      if (!overlapsExclusionZone(newX, newY)) {
+        validPosition = true;
+      }
       
       attempts++;
-      if (distance > minDistance || attempts > 30) break;
-    } while (attempts < 30);
+    }
     
-    return { x: newX, y: newY };
+    // If no valid position found after max attempts, place it far from Yes button
+    if (!validPosition) {
+      const yesCenterX = yesButtonBounds.x + yesButtonBounds.width / 2;
+      if (yesCenterX < containerBounds.width / 2) {
+        newX = containerBounds.width - width - buffer;
+      } else {
+        newX = buffer;
+      }
+      newY = buffer + Math.random() * (containerBounds.height / 3);
+    }
+    
+    return { x: newX!, y: newY! };
   }, [containerBounds, yesButtonBounds, width, height]);
 
   const handleHover = () => {
