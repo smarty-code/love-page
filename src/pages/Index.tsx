@@ -1,12 +1,25 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import FloatingHearts from "@/components/FloatingHearts";
+import ProposalModal from "@/components/ProposalModal";
+import { useURLParam } from "@/hooks/useURLParam";
 
 const Index = () => {
+  const name = useURLParam("name", "My Love");
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen gradient-romantic overflow-hidden relative">
+      {/* Animated gradient background */}
+      <div 
+        className="absolute inset-0 opacity-50"
+        style={{
+          background: "radial-gradient(ellipse at 30% 20%, hsla(330, 100%, 85%, 0.4) 0%, transparent 50%), radial-gradient(ellipse at 70% 80%, hsla(350, 100%, 88%, 0.3) 0%, transparent 50%)",
+        }}
+      />
+      
+      {/* Floating hearts background */}
+      <FloatingHearts />
+      
+      {/* Main proposal modal */}
+      <ProposalModal name={name} />
     </div>
   );
 };
