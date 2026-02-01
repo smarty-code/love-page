@@ -1,9 +1,10 @@
 import FloatingHearts from "@/components/FloatingHearts";
 import ProposalModal from "@/components/ProposalModal";
-import { useURLParam } from "@/hooks/useURLParam";
+import { useURLParam, useImageURL } from "@/hooks/useURLParam";
 
 const Index = () => {
   const name = useURLParam("name", "My Love");
+  const imageUrl = useImageURL("image");
 
   return (
     <div className="min-h-screen gradient-romantic overflow-hidden relative">
@@ -19,7 +20,7 @@ const Index = () => {
       <FloatingHearts />
       
       {/* Main proposal modal */}
-      <ProposalModal name={name} />
+      <ProposalModal name={name} imageUrl={imageUrl} />
     </div>
   );
 };

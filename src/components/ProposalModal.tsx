@@ -4,18 +4,19 @@ import Mascot from "./Mascot";
 import YesButton from "./YesButton";
 import NoButton from "./NoButton";
 import SuccessContent from "./SuccessContent";
+import GirlfriendImage from "./GirlfriendImage";
 
 interface ProposalModalProps {
   name: string;
+  imageUrl: string | null;
 }
 
 interface MultipleYesButton {
   id: string;
   position: { x: number; y: number };
-  size: { width: number; height: number };
 }
 
-const ProposalModal = ({ name }: ProposalModalProps) => {
+const ProposalModal = ({ name, imageUrl }: ProposalModalProps) => {
   const [noAttempts, setNoAttempts] = useState(0);
   const [isSuccess, setIsSuccess] = useState(false);
   const [noButtonPosition, setNoButtonPosition] = useState({ x: 200, y: 180 });
@@ -30,7 +31,7 @@ const ProposalModal = ({ name }: ProposalModalProps) => {
     if (noAttempts === 0) return "happy";
     if (noAttempts < 5) return "sad";
     if (noAttempts < 10) return "pleading";
-    return "excited"; // Getting excited as Yes button takes over
+    return "excited";
   };
 
   const getContainerBounds = useCallback(() => {
@@ -99,17 +100,13 @@ const ProposalModal = ({ name }: ProposalModalProps) => {
         newButtons.push({
           id: `yes-${Date.now()}-${i}`,
           position: {
-            x: Math.random() * (bounds.width - 180) + 40,
-            y: Math.random() * (bounds.height - 100) + 40,
-          },
-          size: {
-            width: 120 + Math.random() * 60,
-            height: 45 + Math.random() * 20,
+            x: Math.random() * (bounds.width - 140) + 20,
+            y: Math.random() * (bounds.height - 60) + 20,
           },
         });
       }
       
-      setMultipleYesButtons((prev) => [...prev, ...newButtons].slice(-12)); // Max 12 extra buttons
+      setMultipleYesButtons((prev) => [...prev, ...newButtons].slice(-12));
     }
   }, [noAttempts, moveNoButton, getContainerBounds]);
 
@@ -117,7 +114,6 @@ const ProposalModal = ({ name }: ProposalModalProps) => {
     setIsSuccess(true);
   };
 
-  // Initialize No button position
   useEffect(() => {
     moveNoButton();
   }, []);
@@ -139,7 +135,7 @@ const ProposalModal = ({ name }: ProposalModalProps) => {
       {/* Modal */}
       <motion.div
         ref={containerRef}
-        className="relative w-full max-w-lg md:max-w-xl lg:max-w-2xl min-h-[400px] md:min-h-[450px] bg-card rounded-3xl shadow-card p-8 md:p-12 overflow-hidden"
+        className="relative w-full max-w-lg md:max-w-xl lg:max-w-2xl min-h-[450px] md:min-h-[500px] bg-card rounded-3xl shadow-card p-8 md:p-12 overflow-hidden"
         initial={{ scale: 0.8, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         transition={{
@@ -165,9 +161,12 @@ const ProposalModal = ({ name }: ProposalModalProps) => {
               exit={{ opacity: 0, scale: 0.9 }}
               className="relative z-10"
             >
+              {/* Girlfriend image */}
+              <GirlfriendImage imageUrl={imageUrl} name={name} />
+
               {/* Proposal text */}
               <motion.div
-                className="text-center mb-12 md:mb-16"
+                className="text-center mb-10 md:mb-12"
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
@@ -209,7 +208,7 @@ const ProposalModal = ({ name }: ProposalModalProps) => {
                   />
                 )}
 
-                {/* Multiple Yes buttons that spawn */}
+                {/* Multiple Yes buttons that spawn - fixed sizes */}
                 {multipleYesButtons.map((btn) => (
                   <YesButton
                     key={btn.id}
@@ -217,7 +216,6 @@ const ProposalModal = ({ name }: ProposalModalProps) => {
                     onClick={handleYesClick}
                     isMultiple
                     customPosition={btn.position}
-                    customSize={btn.size}
                   />
                 ))}
               </div>
@@ -241,7 +239,7 @@ const ProposalModal = ({ name }: ProposalModalProps) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             >
-              <SuccessContent name={name} />
+              <SuccessContent name={name} imageUrl={imageUrl} />
             </motion.div>
           )}
         </AnimatePresence>

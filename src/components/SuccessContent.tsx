@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 
 interface SuccessContentProps {
   name: string;
+  imageUrl?: string | null;
 }
 
-const SuccessContent = ({ name }: SuccessContentProps) => {
+const SuccessContent = ({ name, imageUrl }: SuccessContentProps) => {
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
   const [showConfetti, setShowConfetti] = useState(true);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   useEffect(() => {
     setWindowSize({
@@ -25,7 +27,6 @@ const SuccessContent = ({ name }: SuccessContentProps) => {
 
     window.addEventListener("resize", handleResize);
 
-    // Stop confetti after 7 seconds
     const timer = setTimeout(() => setShowConfetti(false), 7000);
 
     return () => {
@@ -53,7 +54,7 @@ const SuccessContent = ({ name }: SuccessContentProps) => {
       )}
 
       <motion.div
-        className="text-center px-4 py-8"
+        className="text-center px-4 py-6"
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ 
@@ -61,6 +62,49 @@ const SuccessContent = ({ name }: SuccessContentProps) => {
           ease: [0.34, 1.56, 0.64, 1],
         }}
       >
+        {/* Image in success state */}
+        {imageUrl && (
+          <motion.div
+            className="flex justify-center mb-6"
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+          >
+            <div className="relative">
+              <motion.div
+                className="absolute inset-0 rounded-full bg-primary/40 blur-xl"
+                animate={{
+                  scale: [1, 1.2, 1],
+                  opacity: [0.4, 0.6, 0.4],
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+              <div className="relative w-28 h-28 md:w-36 md:h-36 rounded-full overflow-hidden border-4 border-primary shadow-lg">
+                {!imageLoaded && (
+                  <div className="absolute inset-0 bg-muted animate-pulse flex items-center justify-center">
+                    <span className="text-3xl">💕</span>
+                  </div>
+                )}
+                <img
+                  src={imageUrl}
+                  alt={`Photo of ${name}`}
+                  className={`w-full h-full object-cover transition-opacity duration-300 ${
+                    imageLoaded ? "opacity-100" : "opacity-0"
+                  }`}
+                  onLoad={() => setImageLoaded(true)}
+                />
+              </div>
+              <motion.span
+                className="absolute -top-2 -right-2 text-2xl"
+                animate={{ scale: [1, 1.3, 1], rotate: [0, 15, 0] }}
+                transition={{ duration: 1, repeat: Infinity }}
+              >
+                💖
+              </motion.span>
+            </div>
+          </motion.div>
+        )}
+
         {/* Main celebration text */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -111,7 +155,7 @@ const SuccessContent = ({ name }: SuccessContentProps) => {
 
         {/* Secondary message */}
         <motion.p
-          className="text-lg md:text-xl text-muted-foreground font-quicksand mb-8"
+          className="text-lg md:text-xl text-muted-foreground font-quicksand mb-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8, duration: 0.5 }}
@@ -121,7 +165,7 @@ const SuccessContent = ({ name }: SuccessContentProps) => {
 
         {/* Big animated heart */}
         <motion.div
-          className="text-6xl md:text-8xl"
+          className="text-5xl md:text-7xl"
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ 
@@ -148,7 +192,7 @@ const SuccessContent = ({ name }: SuccessContentProps) => {
 
         {/* Love message */}
         <motion.p
-          className="text-xl md:text-2xl font-romantic text-accent mt-8"
+          className="text-xl md:text-2xl font-romantic text-accent mt-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.5 }}
@@ -158,10 +202,10 @@ const SuccessContent = ({ name }: SuccessContentProps) => {
 
         {/* Floating elements around */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {Array.from({ length: 10 }, (_, i) => (
+          {Array.from({ length: 8 }, (_, i) => (
             <motion.div
               key={i}
-              className="absolute text-2xl md:text-3xl"
+              className="absolute text-xl md:text-2xl"
               style={{
                 left: `${Math.random() * 80 + 10}%`,
                 top: `${Math.random() * 80 + 10}%`,

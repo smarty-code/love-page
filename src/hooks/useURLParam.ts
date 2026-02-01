@@ -26,3 +26,28 @@ export const useURLParam = (paramName: string, fallback: string = "my love") => 
 
   return value;
 };
+
+export const useImageURL = (paramName: string = "image") => {
+  const [searchParams] = useSearchParams();
+
+  const imageUrl = useMemo(() => {
+    const param = searchParams.get(paramName);
+
+    if (!param) return null;
+
+    // Basic URL validation
+    try {
+      const url = new URL(decodeURIComponent(param));
+      // Only allow http and https protocols
+      if (url.protocol === "http:" || url.protocol === "https:") {
+        return url.toString();
+      }
+    } catch {
+      return null;
+    }
+
+    return null;
+  }, [searchParams, paramName]);
+
+  return imageUrl;
+};
