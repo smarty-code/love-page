@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { trackSocialShare } from "@/lib/clarity";
 
 // Custom SVG icons for social media
 const WhatsAppIcon = ({ className }: { className?: string }) => (
@@ -31,7 +32,15 @@ interface SocialShareIconsProps {
 }
 
 const SocialShareIcons = ({ url, name }: SocialShareIconsProps) => {
-  const shareMessage = `💕 I created a special Valentine's page for ${name}! Check it out:`;
+  // Personalized romantic message for sharing
+  const shareMessage = `Hey ${name} ❤️
+I made something special for you and I really hope it makes you smile.
+Please open this when you have a quiet moment 🫶
+
+💌 ${url}`;
+
+  // Shorter message for platforms with character limits
+  const shortMessage = `Hey ${name} ❤️ I made something special for you! 💌 ${url}`;
 
   const socialOptions = [
     {
@@ -39,7 +48,8 @@ const SocialShareIcons = ({ url, name }: SocialShareIconsProps) => {
       icon: WhatsAppIcon,
       brandColor: "#25D366",
       onClick: () => {
-        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareMessage + " " + url)}`;
+        trackSocialShare("WhatsApp");
+        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareMessage)}`;
         window.open(whatsappUrl, "_blank");
       },
     },
@@ -48,6 +58,7 @@ const SocialShareIcons = ({ url, name }: SocialShareIconsProps) => {
       icon: FacebookIcon,
       brandColor: "#0084FF",
       onClick: () => {
+        trackSocialShare("Messenger");
         const messengerUrl = `https://www.facebook.com/dialog/send?link=${encodeURIComponent(url)}&app_id=291494419107518&redirect_uri=${encodeURIComponent(url)}`;
         window.open(messengerUrl, "_blank", "width=600,height=400");
       },
@@ -57,8 +68,9 @@ const SocialShareIcons = ({ url, name }: SocialShareIconsProps) => {
       icon: InstagramIcon,
       brandColor: "#E4405F",
       onClick: () => {
-        navigator.clipboard.writeText(shareMessage + " " + url);
-        alert("Link copied! Opening Instagram - paste the link in your DM or Story.");
+        trackSocialShare("Instagram");
+        navigator.clipboard.writeText(shareMessage);
+        alert("Message copied! Opening Instagram - paste it in your DM 💕");
         window.open("https://instagram.com/direct/inbox/", "_blank");
       },
     },
@@ -67,8 +79,11 @@ const SocialShareIcons = ({ url, name }: SocialShareIconsProps) => {
       icon: SnapchatIcon,
       brandColor: "#FFFC00",
       onClick: () => {
-        const snapchatUrl = `https://www.snapchat.com/scan?attachmentUrl=${encodeURIComponent(url)}`;
-        window.open(snapchatUrl, "_blank");
+        trackSocialShare("Snapchat");
+        // Copy the message for Snapchat chat
+        navigator.clipboard.writeText(shortMessage);
+        alert("Message copied! Opening Snapchat - paste it in your chat 💛");
+        window.open("https://www.snapchat.com/", "_blank");
       },
     },
   ];

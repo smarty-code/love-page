@@ -5,6 +5,7 @@ import YesButton from "./YesButton";
 import NoButton from "./NoButton";
 import SuccessContent from "./SuccessContent";
 import GirlfriendImage from "./GirlfriendImage";
+import { trackYesClicked, trackNoAttempted } from "@/lib/clarity";
 
 interface ProposalModalProps {
   name: string;
@@ -163,6 +164,7 @@ const ProposalModal = ({ name, imageUrl }: ProposalModalProps) => {
   const handleNoAttempt = useCallback(() => {
     setNoAttempts((prev) => prev + 1);
     moveNoButton();
+    trackNoAttempted();
     
     // Add multiple Yes buttons after stage 4
     if (noAttempts >= 8) {
@@ -185,6 +187,7 @@ const ProposalModal = ({ name, imageUrl }: ProposalModalProps) => {
   }, [noAttempts, moveNoButton, getContainerBounds]);
 
   const handleYesClick = () => {
+    trackYesClicked();
     setIsSuccess(true);
   };
 

@@ -6,6 +6,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Heart } from "lucide-react";
 import { useEffect } from "react";
+import { trackSharedPageViewed, trackCreateYourOwn } from "@/lib/clarity";
 
 const Index = () => {
   const name = useURLParam("name", "My Love");
@@ -20,10 +21,22 @@ const Index = () => {
     }
   }, [searchParams, navigate]);
 
+  // Track when someone views a shared Valentine page
+  useEffect(() => {
+    if (searchParams.get("name")) {
+      trackSharedPageViewed(name);
+    }
+  }, [name, searchParams]);
+
   // If no name param, don't render the page (will redirect)
   if (!searchParams.get("name")) {
     return null;
   }
+
+  const handleCreateYourOwn = () => {
+    trackCreateYourOwn();
+    navigate("/create");
+  };
 
   return (
     <div className="min-h-screen gradient-romantic overflow-hidden relative">
@@ -47,7 +60,7 @@ const Index = () => {
       {/* Floating "Create Your Own" button - centered at bottom */}
       <div className="fixed bottom-4 md:bottom-6 inset-x-0 z-50 flex justify-center px-4">
         <motion.button
-          onClick={() => navigate("/create")}
+          onClick={handleCreateYourOwn}
           className="flex items-center justify-center gap-2 md:gap-3 bg-primary text-white px-4 py-3 md:px-6 md:py-4 rounded-full shadow-xl hover:bg-primary/90 transition-all border-2 border-white/20 max-w-[90vw]"
           initial={{ opacity: 0, scale: 0, y: 50 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}

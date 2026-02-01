@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCloudinaryUpload } from "@/hooks/useCloudinaryUpload";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,14 @@ import FloatingHearts from "@/components/FloatingHearts";
 import Navbar from "@/components/Navbar";
 import SocialShareIcons from "@/components/SocialShareIcons";
 import { Heart, Upload, Copy, Check, Image as ImageIcon, Sparkles } from "lucide-react";
+import { 
+  trackPageCreationStarted, 
+  trackPageCreated, 
+  trackLinkCopied,
+  trackImageUploadStarted,
+  trackImageUploadCompleted,
+  trackImageUploadFailed
+} from "@/lib/clarity";
 
 const Create = () => {
   const [name, setName] = useState("");
@@ -20,6 +28,11 @@ const Create = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { isUploading, progress, error, upload, reset } = useCloudinaryUpload();
+
+  // Track when user starts creating (visits the page)
+  useEffect(() => {
+    trackPageCreationStarted();
+  }, []);
 
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -70,8 +83,10 @@ const Create = () => {
       return;
     }
 
+    trackImageUploadStarted();
     const result = await upload(selectedFile, name);
     if (result) {
+      trackImageUploadCompleted();
       // Generate the shareable URL
       const baseUrl = window.location.origin;
       const params = new URLSearchParams({
@@ -80,6 +95,9 @@ const Create = () => {
       });
       const shareableUrl = `${baseUrl}/?${params.toString()}`;
       setGeneratedUrl(shareableUrl);
+      trackPageCreated(name.trim());
+    } else if (error) {
+      trackImageUploadFailed(error);
     }
   };
 
@@ -103,6 +121,7 @@ const Create = () => {
           document.body.removeChild(textArea);
         }
         setCopied(true);
+        trackLinkCopied();
         setTimeout(() => setCopied(false), 2000);
       } catch (err) {
         console.error("Failed to copy:", err);
