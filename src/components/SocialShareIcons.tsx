@@ -67,11 +67,30 @@ Please open this when you have a quiet moment 🫶
       name: "Instagram",
       icon: InstagramIcon,
       brandColor: "#E4405F",
-      onClick: () => {
+      onClick: async () => {
         trackSocialShare("Instagram");
-        navigator.clipboard.writeText(shareMessage);
-        alert("Message copied! Opening Instagram - paste it in your DM 💕");
-        window.open("https://instagram.com/direct/inbox/", "_blank");
+        
+        // Use Web Share API if available (shows native share sheet with Instagram option)
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: `Valentine's Page for ${name} 💕`,
+              text: `Hey ${name} ❤️\nI made something special for you and I really hope it makes you smile.\nPlease open this when you have a quiet moment 🫶`,
+              url: url,
+            });
+          } catch (error) {
+            // User cancelled or share failed - fallback to clipboard
+            if ((error as Error).name !== 'AbortError') {
+              navigator.clipboard.writeText(shareMessage);
+              alert("Message copied! You can paste it in Instagram DM 💕");
+            }
+          }
+        } else {
+          // Fallback for browsers without Web Share API
+          navigator.clipboard.writeText(shareMessage);
+          alert("Message copied! Opening Instagram - paste it in your DM 💕");
+          window.open("https://instagram.com/direct/inbox/", "_blank");
+        }
       },
     },
     {

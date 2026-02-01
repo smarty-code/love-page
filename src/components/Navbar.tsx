@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Heart, Home, PlusCircle } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
+import SocialProofBadge from "./SocialProofBadge";
 
 interface NavbarProps {
   isValentinePage?: boolean;
@@ -47,31 +48,36 @@ const Navbar = ({ isValentinePage = false }: NavbarProps) => {
               <span className="drop-shadow-sm">Love Page</span>
             </motion.button>
 
-            {/* Right side - Menu or nothing based on page type */}
-            {!isValentinePage && (
-              <motion.button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="p-2 rounded-xl hover:bg-white/30 transition-colors text-primary backdrop-blur-sm"
-                whileTap={{ scale: 0.9 }}
-                aria-label="Toggle menu"
-              >
-                {isMenuOpen ? (
-                  <X className="w-6 h-6" />
-                ) : (
-                  <Menu className="w-6 h-6" />
-                )}
-              </motion.button>
-            )}
+            {/* Right side - Social proof badge + Menu */}
+            <div className="flex items-center gap-2 md:gap-3">
+              {/* Social Proof Badge */}
+              <SocialProofBadge />
 
-            {/* Show a subtle heart on valentine page instead of menu */}
-            {isValentinePage && (
-              <motion.div
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-              >
-                <Heart className="w-5 h-5 text-primary fill-primary/30" />
-              </motion.div>
-            )}
+              {!isValentinePage && (
+                <motion.button
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  className="p-2 rounded-xl hover:bg-white/30 transition-colors text-primary backdrop-blur-sm"
+                  whileTap={{ scale: 0.9 }}
+                  aria-label="Toggle menu"
+                >
+                  {isMenuOpen ? (
+                    <X className="w-6 h-6" />
+                  ) : (
+                    <Menu className="w-6 h-6" />
+                  )}
+                </motion.button>
+              )}
+
+              {/* Show a subtle heart on valentine page instead of menu */}
+              {isValentinePage && (
+                <motion.div
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                >
+                  <Heart className="w-5 h-5 text-primary fill-primary/30" />
+                </motion.div>
+              )}
+            </div>
           </div>
         </div>
       </nav>
