@@ -6,11 +6,23 @@ interface YesButtonProps {
   onClick: () => void;
   isMultiple?: boolean;
   customPosition?: { x: number; y: number };
-  customSize?: { width: number; height: number };
 }
 
-const YesButton = ({ stage, onClick, isMultiple = false, customPosition, customSize }: YesButtonProps) => {
+const YesButton = ({ stage, onClick, isMultiple = false, customPosition }: YesButtonProps) => {
+  // Main button grows with stage, spawned buttons stay fixed size
   const buttonConfig = useMemo(() => {
+    if (isMultiple) {
+      // Fixed sizes for spawned buttons - they don't grow
+      const sizes = [
+        { width: 100, height: 40, fontSize: "0.875rem" },
+        { width: 120, height: 44, fontSize: "0.95rem" },
+        { width: 110, height: 42, fontSize: "0.9rem" },
+      ];
+      const randomIndex = Math.floor(Math.random() * sizes.length);
+      return { ...sizes[randomIndex], label: "Yes! 💗" };
+    }
+
+    // Main button grows with stage
     const stages = [
       { width: 140, height: 52, fontSize: "1.125rem", label: "Yes! 💗" },
       { width: 170, height: 58, fontSize: "1.25rem", label: "Yes! 💗" },
@@ -21,34 +33,30 @@ const YesButton = ({ stage, onClick, isMultiple = false, customPosition, customS
     ];
     
     return stages[Math.min(stage, stages.length - 1)];
-  }, [stage]);
+  }, [stage, isMultiple]);
 
-  const { width, height, fontSize, label } = customSize 
-    ? { ...buttonConfig, width: customSize.width, height: customSize.height }
-    : buttonConfig;
-
-  const buttonStyle = isMultiple && customPosition 
-    ? { 
-        position: "absolute" as const,
-        left: customPosition.x,
-        top: customPosition.y,
-        width,
-        height,
-        fontSize,
-      }
-    : { width, height, fontSize };
+  const { width, height, fontSize, label } = buttonConfig;
 
   return (
     <motion.button
       onClick={onClick}
-      className="gradient-button text-primary-foreground font-quicksand font-semibold rounded-full shadow-button cursor-pointer select-none"
-      style={buttonStyle}
+      className="gradient-button text-primary-foreground font-quicksand font-semibold rounded-full shadow-button cursor-pointer select-none overflow-hidden whitespace-nowrap flex items-center justify-center"
+      style={{
+        position: isMultiple && customPosition ? "absolute" : "relative",
+        left: isMultiple && customPosition ? customPosition.x : undefined,
+        top: isMultiple && customPosition ? customPosition.y : undefined,
+        width: width,
+        height: height,
+        fontSize: fontSize,
+        minWidth: width,
+        maxWidth: width,
+        minHeight: height,
+        maxHeight: height,
+      }}
       initial={isMultiple ? { scale: 0, opacity: 0 } : { scale: 1 }}
       animate={{ 
         scale: 1, 
         opacity: 1,
-        width,
-        height,
       }}
       whileHover={{ 
         scale: 1.05,
@@ -59,25 +67,14 @@ const YesButton = ({ stage, onClick, isMultiple = false, customPosition, customS
         type: "spring",
         stiffness: 300,
         damping: 20,
-        scale: { duration: 0.2 },
       }}
     >
-      <motion.span
-        animate={stage >= 4 ? {
-          scale: [1, 1.05, 1],
-        } : {}}
-        transition={{
-          duration: 1,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-        className="flex items-center justify-center gap-1"
-      >
+      <span className="flex items-center justify-center gap-1 px-2 truncate">
         {label}
-      </motion.span>
+      </span>
       
-      {/* Glow effect for later stages */}
-      {stage >= 3 && (
+      {/* Glow effect for later stages - only on main button */}
+      {!isMultiple && stage >= 3 && (
         <motion.div
           className="absolute inset-0 rounded-full bg-primary/20 -z-10"
           animate={{
